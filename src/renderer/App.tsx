@@ -142,11 +142,30 @@ function ConnectionContentDetails(props: { entry: Entry }) {
   return <button onClick={() => setShow(true)}>Show Content</button>;
 }
 
+export function FileBrowser(){
+  const onOpenFile = (e) => {
+      debugger
+  }
+
+  return (
+    <div>
+      <Header />
+      <h3>
+        <label for="inputFile">Select a HAR file to browse</label>
+      </h3>
+      <div>
+        <input id="inputFile" type="file" onChange={onOpenFile} />
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<NetworkDetails />} />
+        <Route path="/" element={<FileBrowser />} />
+        <Route path="/network-details" element={<NetworkDetails />} />
       </Routes>
     </Router>
   );
