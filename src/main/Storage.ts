@@ -47,8 +47,6 @@ export class PersistentStorage<T extends StorageEntry> {
         `${this.instanceId}.${this.name}.json`
       );
     }
-
-    console.log('this.storageLocation', this.storageLocation);
   }
 
   private getData(): StorageContent {

@@ -10,7 +10,7 @@ import 'renderer/App.scss';
 
 import { useEffect, useState } from 'react';
 import * as IpcClient from './IpcClient';
-import { type HistoryHar } from '../main/DataUtils';
+import { type HistoryHar, type HarRevision } from '../main/DataUtils';
 
 function Header() {
   const navigate = useNavigate();
@@ -24,13 +24,19 @@ function Header() {
 }
 
 const NetworkDetails = () => {
+  const [revisionId, setRevisionId] = useState('');
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Har | null>(null);
-  const { fileName } = useParams();
+  const { filePath } = useParams();
 
   useEffect(() => {
+    if (!filePath) {
+      setData(null);
+      return;
+    }
+
     setLoading(true);
-    IpcClient.getHarContent(fileName)
+    IpcClient.getHarContent(filePath, revisionId)
       .then((newData) => {
         setData(newData);
       })
@@ -40,9 +46,9 @@ const NetworkDetails = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [fileName]);
+  }, [filePath, revisionId]);
 
-  if (!fileName) {
+  if (!filePath) {
     return (
       <div>
         <Header />
@@ -53,28 +59,30 @@ const NetworkDetails = () => {
 
   if (loading) {
     return (
-      <div>
+      <>
         <Header />
-        <h2>File: {fileName}</h2>
+        <h2>File: {filePath}</h2>
         <h3>Loading...</h3>
-      </div>
+      </>
     );
   }
 
   if (!data) {
     return (
-      <div>
+      <>
         <Header />
-        <h2>File: {fileName}</h2>
+        <h2>File: {filePath}</h2>
+        <RevisionSelector filePath={filePath} value={revisionId} onChange={setRevisionId} />
         <h3>Invalid data</h3>
-      </div>
+      </>
     );
   }
 
   return (
-    <div>
+    <>
       <Header />
-      <h2>File: {fileName}</h2>
+      <h2>File: {filePath}</h2>
+      <RevisionSelector filePath={filePath} value={revisionId} onChange={setRevisionId}/>
       <h3>Har Version: {data?.log.version}</h3>
       <h3>
         Creator:
@@ -83,7 +91,7 @@ const NetworkDetails = () => {
       <div>
         <FlatNetworkDataGrid data={data} />
       </div>
-    </div>
+    </>
   );
 };
 
@@ -150,7 +158,7 @@ function ConnectionContentDetails(props: { entry: Entry }) {
   const content = entry.response.content.text;
 
   if (show) {
-    return content;
+    return <>content</>;
   }
 
   return <button onClick={() => setShow(true)}>Show Content</button>;
@@ -158,7 +166,7 @@ function ConnectionContentDetails(props: { entry: Entry }) {
 
 export function HarBrowser() {
   return (
-    <div>
+    <>
       <Header />
       <h3>Select a HAR file to investigate</h3>
       <div>
@@ -168,7 +176,7 @@ export function HarBrowser() {
       <div>
         <HistoricalHarList />
       </div>
-    </div>
+    </>
   );
 }
 
@@ -233,16 +241,40 @@ export function HistoricalHarList() {
 }
 
 export function RevisionSelector(props:{
-  onChange?: (revisionId: string) => void
+  filePath: string;
+  value: string;
+  onChange: (revisionId: string) => void
 }){
-  const [revisionIds, setRevisionIds] = useState<string[]>([]);
+  const [revisions, setRevisions] = useState<HarRevision[]>([]);
+  const selectedRevisionId = props.value;
 
   useEffect(() => {
-    IpcClient.getHarRevisions()
-      .then((newRevisionIds) => setRevisionIds(newRevisionIds))
-      .catch((err) => setRevisionIds([]));
+    IpcClient.getHarRevisions(props.filePath)
+      .then((newRevisions) => setRevisions(newRevisions))
+      .catch((err) => setRevisions([]));
   }, []);
 
+  console.log(selectedRevisionId, revisions);
+
+  return (
+    <div>
+      <h3>RevisionID: </h3>
+      <select
+        value={selectedRevisionId}
+        onChange={(e) => {
+          // @ts-ignore
+          props.onChange(e.currentTarget.value || '');
+        }}
+      >
+        {revisions.map((revision) => (
+          <option key={revision.revisionId} value={revision.revisionId}>
+            {revision.revisionId}
+          </option>
+        ))}
+        <option value=''>Latest Data</option>
+      </select>
+    </div>
+  );
 }
 
 export default function App() {
@@ -250,7 +282,7 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/" element={<HarBrowser />} />
-        <Route path="/network-details/:fileName" element={<NetworkDetails />} />
+        <Route path="/network-details/:filePath" element={<NetworkDetails />} />
       </Routes>
     </Router>
   );

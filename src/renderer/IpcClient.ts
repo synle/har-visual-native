@@ -1,5 +1,5 @@
 import { Har } from 'har-format';
-import {type HistoryHar} from '../main/DataUtils';
+import { type HistoryHar, type HarRevision } from '../main/DataUtils';
 
 export async function browseHarFile() {
   return new Promise<string>((resolve, reject) => {
@@ -38,7 +38,7 @@ export async function getHarContent(fileName: string, revisionId = '') {
 }
 
 export async function getHarRevisions(fileName: string) {
-  return new Promise<string[]>((resolve, reject) => {
+  return new Promise<HarRevision[]>((resolve, reject) => {
     window.electron.ipcRenderer.sendMessage('ipc-get-har-revisions', [
       fileName,
     ]);
@@ -47,7 +47,7 @@ export async function getHarRevisions(fileName: string) {
       console.log('ipc-get-har-revisions', fileName, arg);
 
       if (arg) {
-        resolve(arg as string[]);
+        resolve(arg as HarRevision[]);
       } else {
         reject();
       }

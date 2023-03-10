@@ -1,9 +1,13 @@
 import fs from 'fs';
 import { Har } from 'har-format';
 import { getHistoricalHarsStorage, getGeneratedRandomId } from './Storage';
+import crypto from 'crypto';
 
-function getHash(content: string){
-  return content.length; // let's do the hash here
+function getHash(fileName: string, content: string){
+  return crypto
+    .createHash('md5')
+    .update(fileName + content)
+    .digest('hex');
 }
 
 export type HistoryHar = {
@@ -11,37 +15,47 @@ export type HistoryHar = {
   filePath: string;
   created: number;
   updated: number;
-  revisions: {
-    revisionId: string;
-    content: string;
-  }[];
+  revisions: HarRevision[];
 };
 
 export type PartialHistoryHar = HistoryHar & {
   id?: string;
 };
 
+export type HarRevision = {
+  revisionId: string;
+  content: string;
+};
+
 const DataUtils = {
   getHarFromFile: async (filePath: string, revisionId: string = '') => {
+
     if(!revisionId){
+      // get from live file
       return JSON.parse(fs.readFileSync(filePath, 'utf8')) as Har;
     } else {
+      // here we attempt to get the har content from our backup with the revision id
       try{
         const historicalHarStorage = await getHistoricalHarsStorage();
         const id = filePath;
 
         const historicalHarEntry = historicalHarStorage.get(id);
-        return historicalHarEntry?.revisions?.find(revision => revision.id === revisionId)?.content;
-      } catch(err){}
+        return historicalHarEntry?.revisions?.find(
+          (revision) => revision.revisionId === revisionId
+        )?.content;
+      } catch(err){
+      }
     }
+
+    return undefined;
   },
-  getHarRevisions:(filePath: string) => {
+  getHarRevisions:async (filePath: string) => {
     try{
         const historicalHarStorage = await getHistoricalHarsStorage();
         const id = filePath;
 
         const historicalHarEntry = historicalHarStorage.get(id);
-        return historicalHarEntry?.revisions?.map(revision => revision.id) || [];
+        return historicalHarEntry?.revisions || [];
       } catch(err){}
 
       return []
@@ -50,19 +64,19 @@ const DataUtils = {
     try {
       const historicalHarStorage = await getHistoricalHarsStorage();
       const resp =  historicalHarStorage.list();
-      console.log('resp', resp);
       return resp;
     } catch (err) {
       return [];
     }
   },
-  addHistoricalHars: async (filePath: string, content: string) => {
+  addHistoricalHar: async (filePath: string, content: string) => {
     try {
       const historicalHarStorage = await getHistoricalHarsStorage();
       const id = filePath;
 
       let historicalHarEntry = historicalHarStorage.get(id);
-      const revisionId = getHash(content);
+      const revisionId = getHash(filePath, JSON.stringify(content));
+
 
       if (!historicalHarEntry) {
         historicalHarEntry ={
@@ -97,7 +111,6 @@ const DataUtils = {
 
       await historicalHarStorage.update(historicalHarEntry);
     } catch (err) {
-      console.log('err', err)
     }
   },
   deleteHistoricalHars: async (id: string) => {

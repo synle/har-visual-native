@@ -141,7 +141,10 @@ ipcMain.on('ipc-get-har-content', async (event, args) => {
 
 ipcMain.on('ipc-get-har-revisions', async (event, args) => {
   const filePath = args[0] as string;
-  event.reply('ipc-get-har-revisions', await DataUtils.getHarRevisions());
+  event.reply(
+    'ipc-get-har-revisions',
+    await DataUtils.getHarRevisions(filePath)
+  );
 });
 
 ipcMain.on('ipc-get-historical-hars', async (event, args) => {
@@ -152,7 +155,7 @@ ipcMain.on('ipc-add-historical-har', async (event, args) => {
   const filePath = args[0] as string;
 
   try{
-    await DataUtils.addHistoricalHars(
+    await DataUtils.addHistoricalHar(
       filePath,
       await DataUtils.getHarFromFile(filePath)
     );
@@ -180,4 +183,9 @@ ipcMain.on('ipc-dialog-har-browse', async (event, args) => {
   } else {
     return event.reply('ipc-dialog-har-browse', filePaths);
   }
+});
+
+ipcMain.on('ipc-reveal-config-folder', async (event, args) => {
+  shell.showItemInFolder('filepath');
+  event.reply('ipc-reveal-config-folder', null);
 });
