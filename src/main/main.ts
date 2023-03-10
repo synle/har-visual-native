@@ -40,8 +40,12 @@ ipcMain.on('ipc-dialog-browseHar', async (event, args) => {
 
   const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
     properties: ['openFile'],
+    filters: [
+      { name: 'Har', extensions: ['har'] },
+      { name: 'All Files', extensions: ['*'] },
+    ],
   });
-  debugger
+
   if (canceled) {
     return;
   } else {
