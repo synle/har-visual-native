@@ -1,7 +1,7 @@
 # har-visual-viewer
 
 ## Screenshots
-![image](https://user-images.githubusercontent.com/3792401/224206973-0ee3411e-653a-4add-875e-5bf00abd0830.png)
+![image](https://user-images.githubusercontent.com/3792401/224403702-e203c55d-dcc6-46c9-8ac7-dc3789b7979f.png)
 
 ![image](https://user-images.githubusercontent.com/3792401/224207006-d98d48dd-abf8-4cdf-a198-f797dc84549f.png)
 

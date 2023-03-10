@@ -14,7 +14,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-import { getHarFromFile } from './util';
+import DataUtils from './DataUtils';
 
 class AppUpdater {
   constructor() {
@@ -25,34 +25,6 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
-
-ipcMain.on('ipc-get-har', async (event, args) => {
-  const fileName = args[0];
-  event.reply('ipc-get-har', await getHarFromFile(fileName));
-});
-
-ipcMain.on('ipc-dialog-browseHar', async (event, args) => {
-  if(!mainWindow){
-    return;
-  }
-
-  const fileName = args[0];
-
-  const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
-    properties: ['openFile'],
-    filters: [
-      { name: 'Har', extensions: ['har'] },
-      { name: 'All Files', extensions: ['*'] },
-    ],
-  });
-
-  if (canceled) {
-    return;
-  } else {
-    return event.reply('ipc-dialog-browseHar', filePaths);
-  }
-});
-
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -158,3 +130,49 @@ app
     });
   })
   .catch(console.log);
+
+// all the events
+ipcMain.on('ipc-get-har-content', async (event, args) => {
+  const filePath = args[0] as string;
+  const liveContent= args[1] as boolean; // TODO: this flag will be used to get live data
+
+  event.reply('ipc-get-har-content', await DataUtils.getHarFromFile(filePath));
+});
+
+ipcMain.on('ipc-get-historical-hars', async (event, args) => {
+  event.reply('ipc-get-historical-hars', await DataUtils.getHistoricalHars());
+});
+
+ipcMain.on('ipc-add-historical-har', async (event, args) => {
+  const filePath = args[0] as string;
+
+  try{
+    await DataUtils.addHistoricalHars(
+      filePath,
+      await DataUtils.getHarFromFile(filePath)
+    );
+  }catch(err){
+    console.log('err', err)
+    event.reply('ipc-add-historical-har', null);
+  }
+});
+
+ipcMain.on('ipc-dialog-har-browse', async (event, args) => {
+  if (!mainWindow) {
+    return;
+  }
+
+  const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openFile'],
+    filters: [
+      { name: 'Har', extensions: ['har'] },
+      { name: 'All Files', extensions: ['*'] },
+    ],
+  });
+
+  if (canceled) {
+    return;
+  } else {
+    return event.reply('ipc-dialog-har-browse', filePaths);
+  }
+});

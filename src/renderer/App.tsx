@@ -9,7 +9,8 @@ import {
 import 'renderer/App.scss';
 
 import { useEffect, useState } from 'react';
-import { getHarContent, browseHarFile } from './Data';
+import * as IpcClient from './IpcClient';
+import { type HistoryHar } from '../main/DataUtils';
 
 function Header() {
   const navigate = useNavigate();
@@ -24,19 +25,17 @@ function Header() {
 
 const NetworkDetails = () => {
   const [loading, setLoading] = useState(true);
-  const [data, sedivata] = useState<Har | null>(null);
+  const [data, setData] = useState<Har | null>(null);
   const { fileName } = useParams();
-
-  console.log(fileName);
 
   useEffect(() => {
     setLoading(true);
-    getHarContent(fileName)
+    IpcClient.getHarContent(fileName)
       .then((newData) => {
-        sedivata(newData);
+        setData(newData);
       })
       .catch((error) => {
-        sedivata(null);
+        setData(null);
       })
       .finally(() => {
         setLoading(false);
@@ -157,25 +156,79 @@ function ConnectionContentDetails(props: { entry: Entry }) {
   return <button onClick={() => setShow(true)}>Show Content</button>;
 }
 
-export function FileBrowser() {
-  const navigate = useNavigate();
-
-  const onOpenFile = async () => {
-    try {
-      const filePaths = await browseHarFile();
-      const fileName = filePaths[0];
-      navigate(`/network-details/${encodeURIComponent(fileName)}`);
-    } catch (err) {}
-  };
-
+export function HarBrowser() {
   return (
     <div>
       <Header />
-      <h3>Select a HAR file to browse</h3>
+      <h3>Select a HAR file to investigate</h3>
       <div>
-        <button onClick={onOpenFile}>Browse for a HAR file</button>
+        <BrowseHarButton />
+      </div>
+      <h3>Recent HARS</h3>
+      <div>
+        <HistoricalHarList />
       </div>
     </div>
+  );
+}
+
+export function BrowseHarButton() {
+  const navigate = useNavigate();
+
+  const onOpenHar = async () => {
+    try {
+      const filePaths = await IpcClient.browseHarFile();
+      const filePath = filePaths[0];
+
+      navigate(`/network-details/${encodeURIComponent(filePath)}`);
+      await IpcClient.addHistoricalHar(filePath);
+    } catch (err) {}
+  };
+
+  return <button onClick={onOpenHar}>Browse for a HAR file</button>;
+}
+
+export function HistoricalHarList() {
+  const navigate = useNavigate();
+  const [historicalHars, setHistoryHars] = useState<HistoryHar[]>([]);
+
+  const onOpenHar = async (filePath: string) => {
+    navigate(`/network-details/${encodeURIComponent(filePath)}`);
+
+    try {
+      await IpcClient.addHistoricalHar(filePath);
+
+      await IpcClient.getHistoricalHars()
+        .then((newHistoryHars) => setHistoryHars(newHistoryHars))
+        .catch((err) => setHistoryHars([]));
+    } catch (err) {}
+  };
+
+  useEffect(() => {
+    IpcClient.getHistoricalHars()
+      .then((newHistoryHars) => setHistoryHars(newHistoryHars))
+      .catch((err) => setHistoryHars([]));
+  }, []);
+
+  if (!historicalHars || historicalHars.length === 0) {
+    return <div>N/A</div>;
+  }
+
+  return (
+    <ul>
+      {historicalHars.map((historicalHar) => {
+        return (
+          <li key={historicalHar.filePath}>
+            <a
+              onClick={() => onOpenHar(historicalHar.filePath)}
+              style={{ cursor: 'pointer' }}
+            >
+              {historicalHar.filePath}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
@@ -183,7 +236,7 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<FileBrowser />} />
+        <Route path="/" element={<HarBrowser />} />
         <Route path="/network-details/:fileName" element={<NetworkDetails />} />
       </Routes>
     </Router>
