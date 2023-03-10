@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -30,6 +30,29 @@ ipcMain.on('ipc-get-har', async (event, args) => {
   const fileName = args[0];
   event.reply('ipc-get-har', await getHarFromFile(fileName));
 });
+
+ipcMain.on('ipc-dialog-browseHar', async (event, args) => {
+  if(!mainWindow){
+    return;
+  }
+
+  const fileName = args[0];
+
+  const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openFile'],
+    filters: [
+      { name: 'Har', extensions: ['har'] },
+      { name: 'All Files', extensions: ['*'] },
+    ],
+  });
+
+  if (canceled) {
+    return;
+  } else {
+    return event.reply('ipc-dialog-browseHar', filePaths);
+  }
+});
+
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');

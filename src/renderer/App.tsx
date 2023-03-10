@@ -1,19 +1,34 @@
 import { Har, Entry } from 'har-format';
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
+import {
+  MemoryRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+  useParams,
+} from 'react-router-dom';
 import 'renderer/App.scss';
 
 import { useEffect, useState } from 'react';
-import { getHarContent } from './Data';
+import { getHarContent, browseHarFile } from './Data';
 
 function Header() {
-  return <h1>HAR-VISUAL-NATIVE</h1>;
+  const navigate = useNavigate();
+  return (
+    <h1>
+      <a onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+        HAR-VISUAL-NATIVE
+      </a>
+    </h1>
+  );
 }
 
 const NetworkDetails = () => {
   const [loading, setLoading] = useState(true);
   const [data, sedivata] = useState<Har | null>(null);
+  const { fileName } = useParams();
 
-  const fileName = './data.har';
+  console.log(fileName);
+
   useEffect(() => {
     setLoading(true);
     getHarContent(fileName)
@@ -142,11 +157,34 @@ function ConnectionContentDetails(props: { entry: Entry }) {
   return <button onClick={() => setShow(true)}>Show Content</button>;
 }
 
+export function FileBrowser() {
+  const navigate = useNavigate();
+
+  const onOpenFile = async () => {
+    try {
+      const filePaths = await browseHarFile();
+      const fileName = filePaths[0];
+      navigate(`/network-details/${encodeURIComponent(fileName)}`);
+    } catch (err) {}
+  };
+
+  return (
+    <div>
+      <Header />
+      <h3>Select a HAR file to browse</h3>
+      <div>
+        <button onClick={onOpenFile}>Browse for a HAR file</button>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<NetworkDetails />} />
+        <Route path="/" element={<FileBrowser />} />
+        <Route path="/network-details/:fileName" element={<NetworkDetails />} />
       </Routes>
     </Router>
   );
