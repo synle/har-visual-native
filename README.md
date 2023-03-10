@@ -1,3 +1,4 @@
-# electron-react-typescript-boilerplate
+# har-visual-viewer
 
-Inspired by https://github.com/electron-react-boilerplate/electron-react-boilerplate#readme
+## Screenshots
+![image](https://user-images.githubusercontent.com/3792401/224203797-c28c1b0f-8efe-4f85-90b8-adcf85ed831c.png)

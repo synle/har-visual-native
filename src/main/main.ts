@@ -14,6 +14,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import { getHarFromFile } from './util';
 
 class AppUpdater {
   constructor() {
@@ -25,10 +26,9 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
+ipcMain.on('ipc-get-har', async (event, args) => {
+  const fileName = args[0];
+  event.reply('ipc-get-har', await getHarFromFile(fileName));
 });
 
 if (process.env.NODE_ENV === 'production') {
