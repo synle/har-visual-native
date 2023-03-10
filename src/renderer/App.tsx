@@ -1,19 +1,34 @@
 import { Har, Entry } from 'har-format';
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
+import {
+  MemoryRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+  useParams,
+} from 'react-router-dom';
 import 'renderer/App.scss';
 
 import { useEffect, useState } from 'react';
-import { getHarContent } from './Data';
+import { getHarContent, browseHarFile } from './Data';
 
 function Header() {
-  return <h1>HAR-VISUAL-NATIVE</h1>;
+  const navigate = useNavigate();
+  return (
+    <h1>
+      <a onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+        HAR-VISUAL-NATIVE
+      </a>
+    </h1>
+  );
 }
 
 const NetworkDetails = () => {
   const [loading, setLoading] = useState(true);
   const [data, sedivata] = useState<Har | null>(null);
+  const { fileName } = useParams();
 
-  const fileName = './data.har';
+  console.log(fileName);
+
   useEffect(() => {
     setLoading(true);
     getHarContent(fileName)
@@ -142,19 +157,23 @@ function ConnectionContentDetails(props: { entry: Entry }) {
   return <button onClick={() => setShow(true)}>Show Content</button>;
 }
 
-export function FileBrowser(){
-  const onOpenFile = (e) => {
-      debugger
-  }
+export function FileBrowser() {
+  const navigate = useNavigate();
+
+  const onOpenFile = async () => {
+    try {
+      const filePaths = await browseHarFile();
+      const fileName = filePaths[0];
+      navigate(`/network-details/${encodeURIComponent(fileName)}`);
+    } catch (err) {}
+  };
 
   return (
     <div>
       <Header />
-      <h3>
-        <label for="inputFile">Select a HAR file to browse</label>
-      </h3>
+      <h3>Select a HAR file to browse</h3>
       <div>
-        <input id="inputFile" type="file" onChange={onOpenFile} />
+        <button onClick={onOpenFile}>Browse for a HAR file</button>
       </div>
     </div>
   );
@@ -165,7 +184,7 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/" element={<FileBrowser />} />
-        <Route path="/network-details" element={<NetworkDetails />} />
+        <Route path="/network-details/:fileName" element={<NetworkDetails />} />
       </Routes>
     </Router>
   );
