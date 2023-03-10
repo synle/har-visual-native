@@ -218,7 +218,7 @@ export function HistoricalHarList() {
     <ul>
       {historicalHars.map((historicalHar) => {
         return (
-          <li key={historicalHar.filePath}>
+          <li key={historicalHar.id}>
             <a
               onClick={() => onOpenHar(historicalHar.filePath)}
               style={{ cursor: 'pointer' }}

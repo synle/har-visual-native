@@ -26,7 +26,7 @@ export async function getHarContent(fileName: string, liveContent = true) {
     ]);
 
     window.electron.ipcRenderer.once('ipc-get-har-content', (arg) => {
-      console.log('ipc-get-har-content', arg);
+      console.log('ipc-get-har-content', fileName, arg);
 
       if (arg) {
         resolve(arg as Har);
@@ -46,7 +46,7 @@ export async function getHistoricalHars() {
       console.log('ipc-get-historical-hars', arg);
 
       if (arg) {
-        resolve(arg[0] as HistoryHar[]);
+        resolve(arg as HistoryHar[]);
       } else {
         reject();
       }
