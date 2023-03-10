@@ -1,8 +1,13 @@
 /* eslint import/prefer-default-export: off */
 import { URL } from 'url';
 import path from 'path';
-import fs from 'fs';
-import { Har } from 'har-format';
+
+export type HistoryHar = {
+  filePath: string;
+  content: string;
+};
+
+let _cache: Record<string, HistoryHar> = {};// TODO: move this into a file based
 
 export function resolveHtmlPath(htmlFileName: string) {
   if (process.env.NODE_ENV === 'development') {
@@ -14,6 +19,3 @@ export function resolveHtmlPath(htmlFileName: string) {
   return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
 }
 
-export async function getHarFromFile(fileName: string) {
-  return JSON.parse(fs.readFileSync(fileName, 'utf8')) as Har;
-}
