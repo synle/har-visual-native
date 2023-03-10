@@ -232,6 +232,19 @@ export function HistoricalHarList() {
   );
 }
 
+export function RevisionSelector(props:{
+  onChange?: (revisionId: string) => void
+}){
+  const [revisionIds, setRevisionIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    IpcClient.getHarRevisions()
+      .then((newRevisionIds) => setRevisionIds(newRevisionIds))
+      .catch((err) => setRevisionIds([]));
+  }, []);
+
+}
+
 export default function App() {
   return (
     <Router>

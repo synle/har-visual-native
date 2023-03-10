@@ -22,13 +22,34 @@ export type PartialHistoryHar = HistoryHar & {
 };
 
 const DataUtils = {
-  getHarFromFile: async (fileName: string) => {
-    return JSON.parse(fs.readFileSync(fileName, 'utf8')) as Har;
+  getHarFromFile: async (filePath: string, revisionId: string = '') => {
+    if(!revisionId){
+      return JSON.parse(fs.readFileSync(filePath, 'utf8')) as Har;
+    } else {
+      try{
+        const historicalHarStorage = await getHistoricalHarsStorage();
+        const id = filePath;
+
+        const historicalHarEntry = historicalHarStorage.get(id);
+        return historicalHarEntry?.revisions?.find(revision => revision.id === revisionId)?.content;
+      } catch(err){}
+    }
+  },
+  getHarRevisions:(filePath: string) => {
+    try{
+        const historicalHarStorage = await getHistoricalHarsStorage();
+        const id = filePath;
+
+        const historicalHarEntry = historicalHarStorage.get(id);
+        return historicalHarEntry?.revisions?.map(revision => revision.id) || [];
+      } catch(err){}
+
+      return []
   },
   getHistoricalHars: async () => {
     try {
-      const sessionsStorage = await getHistoricalHarsStorage();
-      const resp =  sessionsStorage.list();
+      const historicalHarStorage = await getHistoricalHarsStorage();
+      const resp =  historicalHarStorage.list();
       console.log('resp', resp);
       return resp;
     } catch (err) {
@@ -37,14 +58,14 @@ const DataUtils = {
   },
   addHistoricalHars: async (filePath: string, content: string) => {
     try {
-      const sessionsStorage = await getHistoricalHarsStorage();
+      const historicalHarStorage = await getHistoricalHarsStorage();
       const id = filePath;
 
-      let entry = sessionsStorage.get(id);
+      let historicalHarEntry = historicalHarStorage.get(id);
       const revisionId = getHash(content);
 
-      if (!entry) {
-        entry ={
+      if (!historicalHarEntry) {
+        historicalHarEntry ={
           id,
           filePath,
           created: Date.now(),
@@ -57,32 +78,32 @@ const DataUtils = {
           }]
         };
       } else {
-        for(const revision of entry.revisions){
+        for(const revision of historicalHarEntry.revisions){
           if(revision.revisionId === revisionId){
             return;
           }
         }
 
         // let's update the content
-        entry.revisions.push({
+        historicalHarEntry.revisions.push({
           revisionId,
           content,
           created: Date.now(),
           updated: Date.now(),
         })
 
-        entry.updated = Date.now();
+        historicalHarEntry.updated = Date.now();
       }
 
-      await sessionsStorage.update(entry);
+      await historicalHarStorage.update(historicalHarEntry);
     } catch (err) {
       console.log('err', err)
     }
   },
   deleteHistoricalHars: async (id: string) => {
     try {
-      const sessionsStorage = await getHistoricalHarsStorage();
-      return sessionsStorage.delete(id);
+      const historicalHarStorage = await getHistoricalHarsStorage();
+      return historicalHarStorage.delete(id);
     } catch (err) {
     }
   },

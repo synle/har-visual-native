@@ -134,9 +134,14 @@ app
 // all the events
 ipcMain.on('ipc-get-har-content', async (event, args) => {
   const filePath = args[0] as string;
-  const liveContent= args[1] as boolean; // TODO: this flag will be used to get live data
+  const revisionId = args[1] as string;
 
-  event.reply('ipc-get-har-content', await DataUtils.getHarFromFile(filePath));
+  event.reply('ipc-get-har-content', await DataUtils.getHarFromFile(filePath, revisionId));
+});
+
+ipcMain.on('ipc-get-har-revisions', async (event, args) => {
+  const filePath = args[0] as string;
+  event.reply('ipc-get-har-revisions', await DataUtils.getHarRevisions());
 });
 
 ipcMain.on('ipc-get-historical-hars', async (event, args) => {

@@ -18,11 +18,11 @@ export async function browseHarFile() {
 }
 
 // har content
-export async function getHarContent(fileName: string, liveContent = true) {
+export async function getHarContent(fileName: string, revisionId = '') {
   return new Promise<Har>((resolve, reject) => {
     window.electron.ipcRenderer.sendMessage('ipc-get-har-content', [
       fileName,
-      liveContent,
+      revisionId,
     ]);
 
     window.electron.ipcRenderer.once('ipc-get-har-content', (arg) => {
@@ -30,6 +30,24 @@ export async function getHarContent(fileName: string, liveContent = true) {
 
       if (arg) {
         resolve(arg as Har);
+      } else {
+        reject();
+      }
+    });
+  });
+}
+
+export async function getHarRevisions(fileName: string) {
+  return new Promise<string[]>((resolve, reject) => {
+    window.electron.ipcRenderer.sendMessage('ipc-get-har-revisions', [
+      fileName,
+    ]);
+
+    window.electron.ipcRenderer.once('ipc-get-har-revisions', (arg) => {
+      console.log('ipc-get-har-revisions', fileName, arg);
+
+      if (arg) {
+        resolve(arg as string[]);
       } else {
         reject();
       }
