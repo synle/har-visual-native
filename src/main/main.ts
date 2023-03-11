@@ -15,6 +15,9 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import DataUtils from './DataUtils';
+import {
+  getHistoricalHarsStorage,
+} from './Storage';
 
 class AppUpdater {
   constructor() {
@@ -134,9 +137,17 @@ app
 // all the events
 ipcMain.on('ipc-get-har-content', async (event, args) => {
   const filePath = args[0] as string;
-  const liveContent= args[1] as boolean; // TODO: this flag will be used to get live data
+  const revisionId = args[1] as string;
 
-  event.reply('ipc-get-har-content', await DataUtils.getHarFromFile(filePath));
+  event.reply('ipc-get-har-content', await DataUtils.getHarFromFile(filePath, revisionId));
+});
+
+ipcMain.on('ipc-get-har-revisions', async (event, args) => {
+  const filePath = args[0] as string;
+  event.reply(
+    'ipc-get-har-revisions',
+    await DataUtils.getHarRevisions(filePath)
+  );
 });
 
 ipcMain.on('ipc-get-historical-hars', async (event, args) => {
@@ -147,7 +158,7 @@ ipcMain.on('ipc-add-historical-har', async (event, args) => {
   const filePath = args[0] as string;
 
   try{
-    await DataUtils.addHistoricalHars(
+    await DataUtils.addHistoricalHar(
       filePath,
       await DataUtils.getHarFromFile(filePath)
     );
@@ -176,3 +187,17 @@ ipcMain.on('ipc-dialog-har-browse', async (event, args) => {
     return event.reply('ipc-dialog-har-browse', filePaths);
   }
 });
+
+ipcMain.on('ipc-reveal-config-folder', async (event, args) => {
+  const historicalHarStorage = await getHistoricalHarsStorage();
+  _revealFolder(historicalHarStorage.storageLocation);
+});
+
+ipcMain.on('ipc-reveal-filepath', async (event, args) => {
+  const filePath = args[0] as string;
+  _revealFolder(filePath);
+});
+
+async function _revealFolder(filePath: string) {
+  shell.showItemInFolder(filePath);
+}

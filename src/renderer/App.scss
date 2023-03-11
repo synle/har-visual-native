@@ -5,9 +5,66 @@ html {
 }
 
 body {
-  min-height: 100vh;
-  background: #eee;
+  min-height: 90vh;
+  background: #efefef;
   padding-bottom: 2rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  margin: 0;
+  margin-bottom: 0.5rem;
+  padding: 0;
+}
+
+ul li::before {
+  content: '- ';
+}
+
+a {
+  color: #0a66c2; // blue
+}
+
+button,
+select {
+  height: auto;
+  padding: 0.5rem 0.75rem;
+  font-weight: bold;
+  color: #000;
+  background: #fff;
+  border: 2px solid #ccc;
+  box-sizing: border-box;
+  cursor: pointer;
+
+  &:hover {
+    background: #ccc;
+  }
+}
+
+pre {
+  color: #333;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: baseline;
 }
 
 .FlatNetworkDataGrid {
@@ -42,24 +99,5 @@ body {
       position: sticky;
       top: 0;
     }
-  }
-}
-
-a {
-  color: #0a66c2; // blue
-}
-
-button {
-  height: auto;
-  padding: 0.5rem 0.75rem;
-  font-weight: bold;
-  color: #000;
-  background: #fff;
-  border: 2px solid #ccc;
-  box-sizing: border-box;
-  cursor: pointer;
-
-  &:hover {
-    background: #ccc;
   }
 }

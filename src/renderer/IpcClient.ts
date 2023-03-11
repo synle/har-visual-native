@@ -1,5 +1,5 @@
 import { Har } from 'har-format';
-import {type HistoryHar} from '../main/DataUtils';
+import { type HistoryHar, type HarRevision } from '../main/DataUtils';
 
 export async function browseHarFile() {
   return new Promise<string>((resolve, reject) => {
@@ -18,18 +18,36 @@ export async function browseHarFile() {
 }
 
 // har content
-export async function getHarContent(fileName: string, liveContent = true) {
+export async function getHarContent(fileName: string, revisionId = '') {
   return new Promise<Har>((resolve, reject) => {
     window.electron.ipcRenderer.sendMessage('ipc-get-har-content', [
       fileName,
-      liveContent,
+      revisionId,
     ]);
 
     window.electron.ipcRenderer.once('ipc-get-har-content', (arg) => {
-      console.log('ipc-get-har-content', arg);
+      console.log('ipc-get-har-content', fileName, arg);
 
       if (arg) {
         resolve(arg as Har);
+      } else {
+        reject();
+      }
+    });
+  });
+}
+
+export async function getHarRevisions(fileName: string) {
+  return new Promise<HarRevision[]>((resolve, reject) => {
+    window.electron.ipcRenderer.sendMessage('ipc-get-har-revisions', [
+      fileName,
+    ]);
+
+    window.electron.ipcRenderer.once('ipc-get-har-revisions', (arg) => {
+      console.log('ipc-get-har-revisions', fileName, arg);
+
+      if (arg) {
+        resolve(arg as HarRevision[]);
       } else {
         reject();
       }
@@ -46,7 +64,7 @@ export async function getHistoricalHars() {
       console.log('ipc-get-historical-hars', arg);
 
       if (arg) {
-        resolve(arg[0] as HistoryHar[]);
+        resolve(arg as HistoryHar[]);
       } else {
         reject();
       }
@@ -70,4 +88,14 @@ export async function addHistoricalHar(filePath: string) {
       }
     });
   });
+}
+
+
+// reveal config path
+export async function revealDefaultStorageFolder() {
+  window.electron.ipcRenderer.sendMessage('ipc-reveal-config-folder', []);
+}
+
+export async function revealFolder(filePath: string) {
+  window.electron.ipcRenderer.sendMessage('ipc-reveal-filepath', [filePath]);
 }

@@ -1,8 +1,11 @@
 # har-visual-viewer
 
 ## Screenshots
-![image](https://user-images.githubusercontent.com/3792401/224403702-e203c55d-dcc6-46c9-8ac7-dc3789b7979f.png)
+![Screenshot 2023-03-10 at 4 53 03 PM](https://user-images.githubusercontent.com/3792401/224456920-8ce63077-cc19-4f62-bba1-aee16b52c68e.png)
 
-![image](https://user-images.githubusercontent.com/3792401/224207006-d98d48dd-abf8-4cdf-a198-f797dc84549f.png)
+![Screenshot 2023-03-10 at 4 53 11 PM](https://user-images.githubusercontent.com/3792401/224456969-8f7afa07-57dd-48b8-b0c6-a6fe7de9ba0f.png)
 
-![image](https://user-images.githubusercontent.com/3792401/224207016-15e5437a-0a0b-4c25-bc6b-dfbd79e91183.png)
+![Screenshot 2023-03-10 at 4 53 23 PM](https://user-images.githubusercontent.com/3792401/224456989-eaa2846e-898b-4d08-87fc-0e4442f0089a.png)
+
+![Screenshot 2023-03-10 at 4 53 16 PM](https://user-images.githubusercontent.com/3792401/224456979-c407a5a8-4982-4857-86d5-0529cb80447d.png)
+
