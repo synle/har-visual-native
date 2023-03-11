@@ -110,11 +110,11 @@ function FlatNetworkDataGrid(props: { data: Har }) {
   return (
     <div className="FlatNetworkDataGrid">
       <div className="FlatNetworkDataGrid__Header">
-        <div>URL</div>
+        <div>Resp Code</div>
         <div>Method</div>
-        <div>Response Code</div>
-        <div>Content Type</div>
-        <div>MimeType</div>
+        <div>URL</div>
+        <div>Resp Type</div>
+        <div>Resp Size</div>
         <div>Time</div>
         <div>Duration</div>
         <div>Content</div>
@@ -143,11 +143,13 @@ function ConnectionEntryRow(props: { entry: Entry }) {
   return (
     <div className="FlatNetworkDataGrid__Row">
       <div>
-        <a>{requestUrl}</a>
+        <ResponseStatusDescription code={responseCode} text={responseText} />
       </div>
-      <div>{requestMethod}</div>
       <div>
-        {responseCode} {responseText ? <code>{responseText}</code> : null}
+        <h3 style={{ fontWeight: 'bold' }}>{requestMethod}</h3>
+      </div>
+      <div>
+        <a>{requestUrl}</a>
       </div>
       <div>{contentMimeType}</div>
       <div>{Math.round(contentSizeInBytes / 1000)} KB</div>
@@ -285,8 +287,6 @@ export function RevisionSelector(props: {
       .catch((err) => setRevisions([]));
   }, []);
 
-  console.log(selectedRevisionId, revisions);
-
   return (
     <div>
       <h3>RevisionID: </h3>
@@ -334,6 +334,27 @@ export function FileNameAnchor(props: { value: string }) {
         {value}
       </a>
     </h3>
+  );
+}
+
+export function ResponseStatusDescription(props: {
+  code: number;
+  text: string;
+}) {
+  const responseCode = props.code;
+  const responseText = props.text;
+
+  let color = 'grey';
+  if (responseCode >= 200 && responseCode <= 399) {
+    color = 'green';
+  } else if (responseCode >= 400) {
+    color = 'red';
+  }
+
+  return (
+    <>
+      <h3 style={{ color, fontWeight: 'bold' }}>{responseCode}</h3>
+    </>
   );
 }
 
