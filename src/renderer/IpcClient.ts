@@ -89,3 +89,13 @@ export async function addHistoricalHar(filePath: string) {
     });
   });
 }
+
+
+// reveal config path
+export async function revealDefaultStorageFolder() {
+  window.electron.ipcRenderer.sendMessage('ipc-reveal-config-folder', []);
+}
+
+export async function revealFolder(filePath: string) {
+  window.electron.ipcRenderer.sendMessage('ipc-reveal-filepath', [filePath]);
+}

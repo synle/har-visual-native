@@ -61,7 +61,7 @@ const NetworkDetails = () => {
     return (
       <>
         <Header />
-        <h2>File: {filePath}</h2>
+        <FileNameAnchor value={filePath} />
         <h3>Loading...</h3>
       </>
     );
@@ -71,8 +71,12 @@ const NetworkDetails = () => {
     return (
       <>
         <Header />
-        <h2>File: {filePath}</h2>
-        <RevisionSelector filePath={filePath} value={revisionId} onChange={setRevisionId} />
+        <FileNameAnchor value={filePath} />
+        <RevisionSelector
+          filePath={filePath}
+          value={revisionId}
+          onChange={setRevisionId}
+        />
         <h3>Invalid data</h3>
       </>
     );
@@ -81,8 +85,12 @@ const NetworkDetails = () => {
   return (
     <>
       <Header />
-      <h2>File: {filePath}</h2>
-      <RevisionSelector filePath={filePath} value={revisionId} onChange={setRevisionId}/>
+      <FileNameAnchor value={filePath} />
+      <RevisionSelector
+        filePath={filePath}
+        value={revisionId}
+        onChange={setRevisionId}
+      />
       <h3>Har Version: {data?.log.version}</h3>
       <h3>
         Creator:
@@ -145,7 +153,7 @@ function ConnectionEntryRow(props: { entry: Entry }) {
       <div>{Math.round(contentSizeInBytes / 1000)} KB</div>
       <div>{new Date(time).toLocaleString()}</div>
       <div>{Math.floor(durationInMS)} ms</div>
-      <div style={{ textAlign: 'center' }}>
+      <div>
         <ConnectionContentDetails entry={entry} />
       </div>
     </div>
@@ -156,9 +164,29 @@ function ConnectionContentDetails(props: { entry: Entry }) {
   const [show, setShow] = useState(false);
   const { entry } = props;
   const content = entry.response.content.text;
+  const contentMimeType = entry.response.content.mimeType;
 
   if (show) {
-    return <>content</>;
+    if (
+      contentMimeType.includes('application/json') ||
+      contentMimeType.includes('application/xml')
+    ) {
+      try {
+        return <pre>{JSON.stringify(JSON.parse(content), null, 2)}</pre>;
+      } catch (err) {
+        return <pre>{content}</pre>;
+      }
+    }
+    if (contentMimeType.includes('text/')) return <>{content}</>;
+    if (contentMimeType.includes('image/'))
+      return (
+        <img
+          src={`data:${contentMimeType};base64,${content}`}
+          alt="Image File"
+        />
+      );
+
+    return <>{content}</>;
   }
 
   return <button onClick={() => setShow(true)}>Show Content</button>;
@@ -175,6 +203,9 @@ export function HarBrowser() {
       <h3>Recent HARS</h3>
       <div>
         <HistoricalHarList />
+      </div>
+      <div>
+        <RevealDefaultStorageFolderButton />
       </div>
     </>
   );
@@ -240,11 +271,11 @@ export function HistoricalHarList() {
   );
 }
 
-export function RevisionSelector(props:{
+export function RevisionSelector(props: {
   filePath: string;
   value: string;
-  onChange: (revisionId: string) => void
-}){
+  onChange: (revisionId: string) => void;
+}) {
   const [revisions, setRevisions] = useState<HarRevision[]>([]);
   const selectedRevisionId = props.value;
 
@@ -271,9 +302,38 @@ export function RevisionSelector(props:{
             {revision.revisionId}
           </option>
         ))}
-        <option value=''>Latest Data</option>
+        <option value="">Latest Data</option>
       </select>
     </div>
+  );
+}
+
+export function RevealDefaultStorageFolderButton() {
+  return (
+    <a
+      onClick={() => IpcClient.revealDefaultStorageFolder()}
+      style={{ cursor: 'pointer' }}
+      title="Reveal the folder where the default storage used for persistence located"
+    >
+      Reveal Default Storage Folder
+    </a>
+  );
+}
+
+export function FileNameAnchor(props: { value: string }) {
+  const { value } = props;
+
+  return (
+    <h3>
+      <span style={{ marginRight: '0.5rem' }}>File:</span>
+      <a
+        onClick={() => IpcClient.revealFolder(value)}
+        style={{ cursor: 'pointer' }}
+        title="Reveal the folder where this HAR file is located"
+      >
+        {value}
+      </a>
+    </h3>
   );
 }
 

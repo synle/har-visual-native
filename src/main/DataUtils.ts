@@ -1,14 +1,10 @@
 import fs from 'fs';
 import { Har } from 'har-format';
-import { getHistoricalHarsStorage, getGeneratedRandomId } from './Storage';
-import crypto from 'crypto';
+import {
+  getHistoricalHarsStorage,
+  getHash,
+} from './Storage';
 
-function getHash(fileName: string, content: string){
-  return crypto
-    .createHash('md5')
-    .update(fileName + content)
-    .digest('hex');
-}
 
 export type HistoryHar = {
   id: string;

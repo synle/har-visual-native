@@ -2,12 +2,21 @@ import { app } from 'electron';
 import fs from 'fs';
 import path from 'path';
 import {HistoryHar} from './DataUtils'
+import crypto from 'crypto';
 
 export function getGeneratedRandomId(prefix: string) {
   return `${prefix}.${Date.now()}.${Math.floor(
     Math.random() * 10000000000000000
   )}`;
 }
+
+export function getHash(fileName: string, content: string) {
+  return crypto
+    .createHash('md5')
+    .update(fileName + content)
+    .digest('hex');
+}
+
 
 
 const homedir = require('os').homedir();

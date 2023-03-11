@@ -6,17 +6,22 @@ html {
 
 body {
   min-height: 90vh;
-  background: #eee;
+  background: #efefef;
   padding-bottom: 2rem;
 }
 
-h1,h2,h3,h4,h5,h6{
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   margin: 0;
   padding: 0;
   font-weight: normal;
 }
 
-ul{
+ul {
   margin: 0;
   padding: 0;
 }
@@ -28,7 +33,7 @@ li {
 }
 
 ul li::before {
-  content: "- ";
+  content: '- ';
 }
 
 a {
@@ -51,7 +56,11 @@ select {
   }
 }
 
-#root{
+pre {
+  color: #333;
+}
+
+#root {
   display: flex;
   flex-direction: column;
   gap: 1rem;

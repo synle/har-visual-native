@@ -15,6 +15,9 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import DataUtils from './DataUtils';
+import {
+  getHistoricalHarsStorage,
+} from './Storage';
 
 class AppUpdater {
   constructor() {
@@ -186,6 +189,15 @@ ipcMain.on('ipc-dialog-har-browse', async (event, args) => {
 });
 
 ipcMain.on('ipc-reveal-config-folder', async (event, args) => {
-  shell.showItemInFolder('filepath');
-  event.reply('ipc-reveal-config-folder', null);
+  const historicalHarStorage = await getHistoricalHarsStorage();
+  _revealFolder(historicalHarStorage.storageLocation);
 });
+
+ipcMain.on('ipc-reveal-filepath', async (event, args) => {
+  const filePath = args[0] as string;
+  _revealFolder(filePath);
+});
+
+async function _revealFolder(filePath: string) {
+  shell.showItemInFolder(filePath);
+}
