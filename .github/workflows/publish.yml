@@ -22,35 +22,91 @@ jobs:
         with:
           node-version: 16
           cache: npm
-
+          
       - name: Install and build
         run: |
           npm install
           npm run postinstall
           npm run build
 
-      - name: Publish releases mac and windows
+      - name: Package mac
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm exec electron-builder -- --publish=never --mac
+          find ./release
 
-      - name: Upload mac arm64.app
+      - name: Package win
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm exec electron-builder -- --publish=never --win
+
+      - name: Package linux
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm exec electron-builder -- --publish=never --linux
+
+      - name: List
+        run: |
+          find ./release
+
+      - name: Upload Artifact
+        continue-on-error: true
         uses: actions/upload-artifact@v3
         with:
-          name: Har-Visual-Native-mac-arm64.app
-          path: ./release/build/mac-arm64/Har-Visual-Native.app
+          name: Har-Visual-Native-0.0.1-arm64.dmg
+          path: ./release/build/Har-Visual-Native-0.0.1-arm64.dmg
 
-      - name: Upload mac .app
+      - name: Upload Artifact
+        continue-on-error: true
         uses: actions/upload-artifact@v3
         with:
-          name: Har-Visual-Native.app
-          path: ./release/build/mac/Har-Visual-Native.app
+          name: Har-Visual-Native-0.0.1.dmg
+          path: ./release/build/Har-Visual-Native-0.0.1.dmg
 
-      # - name: Publish releases mac and windows
-      #   run: |
-      #     npm exec electron-builder -- --publish=never --win
+      - name: Upload Artifact
+        continue-on-error: true
+        uses: actions/upload-artifact@v3
+        with:
+          name: Har-Visual-Native Setup 0.0.1.exe
+          path: ./release/build/Har-Visual-Native Setup 0.0.1.exe
 
-      # - name: Upload .exe
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: Har-Visual-Native.exe
-      #     path: ./release/build/win-unpacked/Har-Visual-Native.exe
+      - name: Upload Artifact
+        continue-on-error: true
+        uses: actions/upload-artifact@v3
+        with:
+          name: Har-Visual-Native-0.0.1.AppImage
+          path: ./release/build/Har-Visual-Native-0.0.1.AppImage
+
+      - name: Upload Artifact
+        continue-on-error: true
+        uses: actions/upload-artifact@v3
+        with:
+          name: Har-Visual-Native-0.0.1.deb
+          path: ./release/build/har-visual-native_0.0.1_amd64.deb
+
+      - name: Upload Artifact
+        continue-on-error: true
+        uses: actions/upload-artifact@v3
+        with:
+          name: Har-Visual-Native-0.0.1.pacman
+          path: ./release/build/Har-Visual-Native-0.0.1.pacman
+
+      - name: Upload Artifact
+        continue-on-error: true
+        uses: actions/upload-artifact@v3
+        with:
+          name: Har-Visual-Native-0.0.1.snap
+          path: ./release/build/Har-Visual-Native-0.0.1.snap
+
+      - name: Upload Artifact
+        continue-on-error: true
+        uses: actions/upload-artifact@v3
+        with:
+          name: Har-Visual-Native-0.0.1.rpm
+          path: ./release/build/Har-Visual-Native-0.0.1.rpm

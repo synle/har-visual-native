@@ -4,13 +4,13 @@
     "electron",
     "react"
   ],
-  "homepage": "https://github.com/synle/electron-react-typescript-boilerplate#readme",
+  "homepage": "https://github.com/synle/har-visual-native#readme",
   "bugs": {
-    "url": "https://github.com/synle/electron-react-typescript-boilerplate/issues"
+    "url": "https://github.com/synle/har-visual-native/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/synle/electron-react-typescript-boilerplate.git"
+    "url": "git+https://github.com/synle/har-visual-native.git"
   },
   "license": "MIT",
   "author": {
@@ -220,7 +220,10 @@
     },
     "linux": {
       "target": [
-        "AppImage"
+        "deb",
+        "pacman",
+        "rpm",
+        "snap"
       ],
       "category": "Development"
     },
@@ -234,7 +237,7 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "har-visual-native",
+      "owner": "synle",
       "repo": "har-visual-native"
     }
   },
