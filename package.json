@@ -1,5 +1,5 @@
 {
-  "description": "electron-react-typescript-boilerplate",
+  "description": "har-visual-native",
   "keywords": [
     "electron",
     "react"
@@ -33,7 +33,7 @@
     "start:main": "cross-env NODE_ENV=development electronmon -r ts-node/register/transpile-only .",
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
-    "test": "echo 'No Test Yet'",
+    "test": "ts-node parserUtils",
     "test2": "jest"
   },
   "lint-staged": {
@@ -175,8 +175,8 @@
     "webpack-merge": "^5.8.0"
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "Har-Visual-Native",
+    "appId": "io.synle.github.har-visual-native",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
@@ -234,8 +234,8 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "electron-react-typescript-boilerplate",
-      "repo": "electron-react-typescript-boilerplate"
+      "owner": "har-visual-native",
+      "repo": "har-visual-native"
     }
   },
   "devEngines": {
