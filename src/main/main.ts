@@ -203,5 +203,13 @@ ipcMain.on('ipc-reveal-filepath', async (event, args) => {
 });
 
 async function _revealFolder(filePath: string) {
-  shell.showItemInFolder(filePath);
+  try{
+    shell.showItemInFolder(filePath);
+  } catch(err){
+    dialog.showMessageBox(null, {
+    title: 'File Path',
+    message: `The full path is shown below`,
+    detail: `${filePath}`
+  })
+  }
 }
