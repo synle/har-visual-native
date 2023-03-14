@@ -11,12 +11,14 @@ import 'renderer/App.scss';
 import { useEffect, useState } from 'react';
 import * as IpcClient from './IpcClient';
 import { type HistoryHar, type HarRevision } from '../main/DataUtils';
+import DataTable from './DataTable';
 
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
+import Chip from '@mui/material/Chip';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import OutlinedInput from '@mui/material/OutlinedInput';
@@ -151,61 +153,69 @@ const NetworkDetails = () => {
 
 function FlatNetworkDataGrid(props: { data: Har }) {
   const { data } = props;
-  const entries = data.log.entries;
+  const entries = data?.log?.entries;
 
-  return (
-    <div className="FlatNetworkDataGrid">
-      <div className="FlatNetworkDataGrid__Header">
-        <div>Resp Code</div>
-        <div>Method</div>
-        <div>URL</div>
-        <div>Resp Type</div>
-        <div>Resp Size</div>
-        <div>Time</div>
-        <div>Duration</div>
-        <div>Content</div>
-      </div>
-      {entries.map((entry) => (
-        <ConnectionEntryRow
-          entry={entry}
-          key={`${entry.connection}.${entry.request.url}.${entry.startedDateTime}`}
-        />
-      ))}
-    </div>
-  );
-}
+  const columns = [
+    {
+      Header: 'Method',
+      accessor: (entry: Entry) => entry.request.method,
+    },
+    {
+      Header: 'URL',
+      accessor: (entry: Entry) => entry.request.url,
+      Cell: (data: any, a, b, c) => {
+        return (
+          <Box
+            sx={{
+              maxWidth: '200px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              wordBreak: 'break-all',
+            }}
+          >
+            {data.value}
+          </Box>
+        );
+      },
+    },
+    {
+      Header: 'RespCode',
+      accessor: (entry: Entry) => entry.response.status,
+    },
+    {
+      Header: 'RespText',
+      accessor: (entry: Entry) => entry.response.statusText || 'N/A',
+    },
+    {
+      Header: 'MIMEType',
+      accessor: (entry: Entry) => entry.response.content.mimeType,
+    },
+    {
+      Header: 'Size',
+      accessor: (entry: Entry) =>
+        `${(entry.response.content.size / 1024).toFixed(2)} KB`,
+    },
+    {
+      Header: 'StartTime',
+      accessor: (entry: Entry) => new Date(entry.startedDateTime).getTime(),
+      Cell: (data: any, a, b, c) => {
+        return new Date(data.value).toLocaleString();
+      },
+    },
+    {
+      Header: 'Duration',
+      accessor: (entry: Entry) => `${Math.round(entry.time)} ms`,
+    },
+    {
+      Header: 'content',
+      accessor: 'entry.response.content.text',
+      Cell: (data: any, a, b, c) => {
+        return <ConnectionContentDetails entry={data.row.original} />
+      }
+    },
+  ];
 
-function ConnectionEntryRow(props: { entry: Entry }) {
-  const { entry } = props;
-  const requestUrl = entry.request.url;
-  const requestMethod = entry.request.method;
-  const responseCode = entry.response.status;
-  const responseText = entry.response.statusText;
-  const contentMimeType = entry.response.content.mimeType;
-  const contentSizeInBytes = entry.response.content.size;
-  const time = entry.startedDateTime;
-  const durationInMS = entry.time;
-
-  return (
-    <div className="FlatNetworkDataGrid__Row">
-      <div>
-        <ResponseStatusDescription code={responseCode} text={responseText} />
-      </div>
-      <div>
-        <h3 style={{ fontWeight: 'bold' }}>{requestMethod}</h3>
-      </div>
-      <div>
-        <a>{requestUrl}</a>
-      </div>
-      <div>{contentMimeType}</div>
-      <div>{Math.round(contentSizeInBytes / 1000)} KB</div>
-      <div>{new Date(time).toLocaleString()}</div>
-      <div>{Math.floor(durationInMS)} ms</div>
-      <div>
-        <ConnectionContentDetails entry={entry} />
-      </div>
-    </div>
-  );
+  return <DataTable data={entries} columns={columns} />;
 }
 
 function ConnectionContentDetails(props: { entry: Entry }) {
