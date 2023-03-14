@@ -12,6 +12,12 @@ import { useEffect, useState } from 'react';
 import * as IpcClient from './IpcClient';
 import { type HistoryHar, type HarRevision } from '../main/DataUtils';
 
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+
+
 function Header() {
   const navigate = useNavigate();
   return (
