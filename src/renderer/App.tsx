@@ -117,7 +117,8 @@ const NetworkDetails = () => {
         />
         <Alert severity="error">
           <AlertTitle>Error</AlertTitle>
-          Invalid Data
+          Invalid Data because the file <strong>{filePath}</strong> is either
+          not present or corrupted JSON.
         </Alert>
       </AppContent>
     );
