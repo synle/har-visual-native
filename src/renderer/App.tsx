@@ -17,15 +17,50 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import NativeSelect from '@mui/material/NativeSelect';
+import FilledInput from '@mui/material/TextField';
+import Stack from '@mui/material/Stack';
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import Paper from '@mui/material/Paper';
+import AppBar from '@mui/material/AppBar';
+import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
+import Link from '@mui/material/Link';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Divider from '@mui/material/Divider';
+import WifiIcon from '@mui/icons-material/Wifi';
+
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import Typography from '@mui/material/Typography';
+import Toolbar from '@mui/material/Toolbar';
 
 function Header() {
   const navigate = useNavigate();
   return (
-    <h1>
-      <a onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-        HAR-VISUAL-NATIVE
-      </a>
-    </h1>
+    <AppBar position="static" sx={{ p: 2 }}>
+      <Box>
+        <Typography
+          variant="h5"
+          component="div"
+          sx={{ cursor: 'pointer' }}
+          onClick={() => navigate('/')}
+        >
+          Har-Visual-Native
+        </Typography>
+      </Box>
+    </AppBar>
   );
 }
 
@@ -56,56 +91,60 @@ const NetworkDetails = () => {
 
   if (!filePath) {
     return (
-      <div>
-        <Header />
+      <AppContent>
         <h3>Missing File</h3>
-      </div>
+      </AppContent>
     );
   }
 
   if (loading) {
     return (
-      <>
-        <Header />
+      <AppContent>
         <FileNameAnchor value={filePath} />
         <h3>Loading...</h3>
-      </>
+      </AppContent>
     );
   }
 
   if (!data) {
     return (
-      <>
-        <Header />
+      <AppContent>
         <FileNameAnchor value={filePath} />
         <RevisionSelector
           filePath={filePath}
           value={revisionId}
           onChange={setRevisionId}
         />
-        <h3>Invalid data</h3>
-      </>
+        <Alert severity="error">
+          <AlertTitle>Error</AlertTitle>
+          Invalid Data
+        </Alert>
+      </AppContent>
     );
   }
 
   return (
-    <>
-      <Header />
+    <AppContent>
       <FileNameAnchor value={filePath} />
       <RevisionSelector
         filePath={filePath}
         value={revisionId}
         onChange={setRevisionId}
       />
-      <h3>Har Version: {data?.log.version}</h3>
-      <h3>
-        Creator:
-        {data?.log.creator.name} (Version: {data?.log.creator.version})
-      </h3>
+      <FilledInput
+        label="Har Version"
+        variant="outlined"
+        value={data?.log.version}
+      />
+      <FilledInput
+        label="Creator"
+        variant="outlined"
+        value={`${data?.log.creator.name} (Version: ${data?.log.creator.version})`}
+      />
       <div>
         <FlatNetworkDataGrid data={data} />
       </div>
-    </>
+    </AppContent>
   );
 };
 
@@ -197,25 +236,48 @@ function ConnectionContentDetails(props: { entry: Entry }) {
     return <>{content}</>;
   }
 
-  return <button onClick={() => setShow(true)}>Show Content</button>;
+  return (
+    <Button color="info" variant="outlined" onClick={() => setShow(true)}>
+      Show Content
+    </Button>
+  );
+}
+
+export function AppContent(props: {
+  children: undefined | null | JSX.Element | JSX.Element[];
+}) {
+  const { children } = props;
+  return (
+    <>
+      <Header />
+      <Stack sx={{ px: 2 }} spacing={3}>
+        {children}
+      </Stack>
+    </>
+  );
 }
 
 export function HarBrowser() {
   return (
-    <>
-      <Header />
-      <h3>Select a HAR file to investigate</h3>
-      <div>
-        <BrowseHarButton />
-      </div>
-      <h3>Recent HARS</h3>
-      <div>
+    <AppContent>
+      <Paper sx={{ px: 2, py: 1 }} elevation={3}>
+        <Typography gutterBottom variant="h6" component="div">
+          Select a HAR file to investigate
+        </Typography>
+        <Box>
+          <BrowseHarButton />
+        </Box>
+      </Paper>
+      <Paper sx={{ px: 2, py: 1 }} elevation={3}>
+        <Typography gutterBottom variant="h6" component="div">
+          Recent HAR's
+        </Typography>
         <HistoricalHarList />
-      </div>
+      </Paper>
       <div>
         <RevealDefaultStorageFolderButton />
       </div>
-    </>
+    </AppContent>
   );
 }
 
@@ -232,7 +294,11 @@ export function BrowseHarButton() {
     } catch (err) {}
   };
 
-  return <button onClick={onOpenHar}>Browse for a HAR file</button>;
+  return (
+    <Button onClick={onOpenHar} variant="contained">
+      Browse for a HAR file
+    </Button>
+  );
 }
 
 export function HistoricalHarList() {
@@ -262,20 +328,24 @@ export function HistoricalHarList() {
   }
 
   return (
-    <ul>
+    <List sx={{ width: '100%' }}>
       {historicalHars.map((historicalHar) => {
         return (
-          <li key={historicalHar.id}>
-            <a
-              onClick={() => onOpenHar(historicalHar.filePath)}
-              style={{ cursor: 'pointer' }}
-            >
-              {historicalHar.filePath}
-            </a>
-          </li>
+          <ListItem
+            key={historicalHar.id}
+            onClick={() => onOpenHar(historicalHar.filePath)}
+            disablePadding
+          >
+            <ListItemIcon sx={{ minWidth: 'auto' }}>
+              <WifiIcon />
+            </ListItemIcon>
+            <ListItemButton>
+              <ListItemText primary={historicalHar.filePath} />
+            </ListItemButton>
+          </ListItem>
         );
       })}
-    </ul>
+    </List>
   );
 }
 
@@ -293,14 +363,28 @@ export function RevisionSelector(props: {
       .catch((err) => setRevisions([]));
   }, []);
 
+  const DEFAULT_EMPTY_VALUE = 'latest';
+
   return (
-    <div>
-      <h3>RevisionID: </h3>
-      <select
-        value={selectedRevisionId}
+    <FormControl fullWidth variant="outlined">
+      <InputLabel variant="outlined" htmlFor="har-revision-select">
+        HAR Revision
+      </InputLabel>
+      <NativeSelect
+        input={<OutlinedInput label="HAR Revision" />}
+        inputProps={{
+          id: 'har-revision-select',
+        }}
+        value={selectedRevisionId || DEFAULT_EMPTY_VALUE}
         onChange={(e) => {
           // @ts-ignore
-          props.onChange(e.currentTarget.value || '');
+          let value = e.currentTarget.value || '';
+
+          if (value === DEFAULT_EMPTY_VALUE) {
+            value = '';
+          }
+
+          props.onChange(value);
         }}
       >
         {revisions.map((revision) => (
@@ -308,39 +392,29 @@ export function RevisionSelector(props: {
             {revision.revisionId}
           </option>
         ))}
-        <option value="">Latest Data</option>
-      </select>
-    </div>
+        <option value="latest">Latest Data</option>
+      </NativeSelect>
+    </FormControl>
   );
 }
 
 export function RevealDefaultStorageFolderButton() {
   return (
-    <a
+    <Button
       onClick={() => IpcClient.revealDefaultStorageFolder()}
       style={{ cursor: 'pointer' }}
       title="Reveal the folder where the default storage used for persistence located"
+      variant="outlined"
     >
       Reveal Default Storage Folder
-    </a>
+    </Button>
   );
 }
 
 export function FileNameAnchor(props: { value: string }) {
   const { value } = props;
 
-  return (
-    <h3>
-      <span style={{ marginRight: '0.5rem' }}>File:</span>
-      <a
-        onClick={() => IpcClient.revealFolder(value)}
-        style={{ cursor: 'pointer' }}
-        title="Reveal the folder where this HAR file is located"
-      >
-        {value}
-      </a>
-    </h3>
-  );
+  return <FilledInput label="File Path" variant="outlined" value={value} />;
 }
 
 export function ResponseStatusDescription(props: {
