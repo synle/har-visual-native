@@ -136,10 +136,14 @@ app
 
 // all the events
 ipcMain.on('ipc-get-har-content', async (event, args) => {
-  const filePath = args[0] as string;
-  const revisionId = args[1] as string;
+  try{
+    const filePath = args[0] as string;
+    const revisionId = args[1] as string;
 
-  event.reply('ipc-get-har-content', await DataUtils.getHarFromFile(filePath, revisionId));
+    event.reply('ipc-get-har-content', await DataUtils.getHarFromFile(filePath, revisionId));
+  } catch(err){
+    event.reply('ipc-get-har-content', null);
+  }
 });
 
 ipcMain.on('ipc-get-har-revisions', async (event, args) => {
