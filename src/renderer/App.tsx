@@ -1,3 +1,4 @@
+import CssBaseline from '@mui/material/CssBaseline';
 import { Har, Entry } from 'har-format';
 import {
   MemoryRouter as Router,
@@ -47,6 +48,8 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 function Header() {
   const navigate = useNavigate();
@@ -103,7 +106,9 @@ const NetworkDetails = () => {
     return (
       <AppContent>
         <FileNameAnchor value={filePath} />
-        <h3>Loading...</h3>
+        <Box>
+          <CircularProgress />
+        </Box>
       </AppContent>
     );
   }
@@ -209,6 +214,7 @@ function FlatNetworkDataGrid(props: { data: Har }) {
     {
       Header: 'Content',
       accessor: 'entry.response.content.text',
+      disableFilters: true,
       Cell: (data: any, a, b, c) => {
         return <ConnectionContentDetails entry={data.row.original} />;
       },
@@ -451,11 +457,17 @@ export function ResponseStatusDescription(props: {
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HarBrowser />} />
-        <Route path="/network-details/:filePath" element={<NetworkDetails />} />
-      </Routes>
-    </Router>
+    <>
+      <CssBaseline />
+      <Router>
+        <Routes>
+          <Route path="/" element={<HarBrowser />} />
+          <Route
+            path="/network-details/:filePath"
+            element={<NetworkDetails />}
+          />
+        </Routes>
+      </Router>
+    </>
   );
 }
