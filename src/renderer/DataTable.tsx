@@ -196,7 +196,11 @@ export default function DataTable(props: DataTableProps) {
                 {headerGroup.headers.map((column, colIdx) => (
                   <StyledTableCell
                     {...column.getHeaderProps({
-                      style: { minWidth: column.minWidth, width: column.width, verticalAlign: 'top' },
+                      style: {
+                        minWidth: column.minWidth,
+                        width: column.width,
+                        verticalAlign: 'top',
+                      },
                     })}
                   >
                     <Box
@@ -241,7 +245,7 @@ export default function DataTable(props: DataTableProps) {
                           style: {
                             minWidth: cell.column.minWidth,
                             width: cell.column.width,
-                            verticalAlign: 'top'
+                            verticalAlign: 'top',
                           },
                         })}
                       >

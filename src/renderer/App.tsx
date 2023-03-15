@@ -207,11 +207,11 @@ function FlatNetworkDataGrid(props: { data: Har }) {
       accessor: (entry: Entry) => `${Math.round(entry.time)} ms`,
     },
     {
-      Header: 'content',
+      Header: 'Content',
       accessor: 'entry.response.content.text',
       Cell: (data: any, a, b, c) => {
-        return <ConnectionContentDetails entry={data.row.original} />
-      }
+        return <ConnectionContentDetails entry={data.row.original} />;
+      },
     },
   ];
 
