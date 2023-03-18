@@ -5,13 +5,13 @@ on:
     branches:
       - main
 
-jobs:
-  publish:
-    runs-on: ${{ matrix.os }}
+env:
+  NODE_VERSION: 16
+  APP_PACKAGE_NAME: Har-Visual-Native
 
-    strategy:
-      matrix:
-        os: [macos-latest]
+jobs:
+  publish_mac:
+    runs-on: macos-latest
 
     steps:
       - name: Checkout git repo
@@ -20,7 +20,7 @@ jobs:
       - name: Install Node and NPM
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: ${{env.NODE_VERSION}}
           cache: npm
 
       - name: Install and build
@@ -29,84 +29,169 @@ jobs:
           npm run postinstall
           npm run build
 
-      - name: Package mac
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Package OSX
         run: |
           npm exec electron-builder -- --publish=never --mac
-          find ./release
 
-      - name: Package win
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Renames arm64.dmg
+        run: |
+          mv ./release/build/*-arm64.dmg "./$APP_PACKAGE_NAME-arm64.dmg"
+
+      - name: Renames intel.dmg
+        run: |
+          mv ./release/build/*.dmg "./$APP_PACKAGE_NAME-intel.dmg"
+
+      - name: Upload arm64.dmg
+        uses: actions/upload-artifact@v3
+        with:
+          name: "${{env.APP_PACKAGE_NAME}}-arm64.dmg"
+          path: "./${{env.APP_PACKAGE_NAME}}-arm64.dmg"
+
+      - name: Upload intel.dmg
+        uses: actions/upload-artifact@v3
+        with:
+          name: "${{env.APP_PACKAGE_NAME}}-intel.dmg"
+          path: "./${{env.APP_PACKAGE_NAME}}-intel.dmg"
+
+  publish_windows:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      - name: Install Node and NPM
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{env.NODE_VERSION}}
+          cache: npm
+
+      - name: Install and build
+        run: |
+          npm install
+          npm run postinstall
+          npm run build
+
+      - name: Package Windows
         run: |
           npm exec electron-builder -- --publish=never --win
 
-      - name: Package linux
+      - name: Renames setup.exe
+        run: |
+          mv ./release/build/*Setup*.exe "./$APP_PACKAGE_NAME Setup.exe"
+
+      - name: Upload setup.exe
+        uses: actions/upload-artifact@v3
+        with:
+          name: "${{env.APP_PACKAGE_NAME}}-setup.exe"
+          path: "./${{env.APP_PACKAGE_NAME}} Setup.exe"
+
+  publish_linux:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      - name: Install Node and NPM
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{env.NODE_VERSION}}
+          cache: npm
+
+      - name: Install and build
+        run: |
+          npm install
+          npm run postinstall
+          npm run build
+
+      - name: Package Linux
         continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm exec electron-builder -- --publish=never --linux
 
-      - name: List
+      - name: Renames AppImage
         run: |
-          find ./release
+          mv ./release/build/*.AppImage "./$APP_PACKAGE_NAME.AppImage"
 
-      - name: Upload Artifact
+      - name: Renames amd64.deb
+        run: |
+          mv ./release/build/*.deb "./$APP_PACKAGE_NAME-amd64.deb"
+
+      - name: Renames pacman
+        run: |
+          mv ./release/build/*.pacman "./$APP_PACKAGE_NAME.pacman"
+
+      - name: Renames snap
+        run: |
+          mv ./release/build/*.snap "./$APP_PACKAGE_NAME.snap"
+
+      - name: Renames rpm
+        continue-on-error: true
+        run: |
+          mv ./release/build/*.rpm "./$APP_PACKAGE_NAME.rpm"
+
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v3
+        with:
+          name: "${{env.APP_PACKAGE_NAME}}-AppImage"
+          path: "./${{env.APP_PACKAGE_NAME}}.AppImage"
+
+      - name: Upload amd64.deb
+        uses: actions/upload-artifact@v3
+        with:
+          name: "${{env.APP_PACKAGE_NAME}}-amd64.deb"
+          path: "./${{env.APP_PACKAGE_NAME}}-amd64.deb"
+
+      - name: Upload pacman
+        uses: actions/upload-artifact@v3
+        with:
+          name: "${{env.APP_PACKAGE_NAME}}-pacman"
+          path: "./${{env.APP_PACKAGE_NAME}}.pacman"
+
+      - name: Upload snap
+        uses: actions/upload-artifact@v3
+        with:
+          name: "${{env.APP_PACKAGE_NAME}}-snap"
+          path: "./${{env.APP_PACKAGE_NAME}}.snap"
+
+      - name: Upload rpm
         continue-on-error: true
         uses: actions/upload-artifact@v3
         with:
-          name: Har-Visual-Native-0.0.1-arm64.dmg
-          path: ./release/build/Har-Visual-Native-0.0.1-arm64.dmg
+          name: "${{env.APP_PACKAGE_NAME}}-rpm"
+          path: "./${{env.APP_PACKAGE_NAME}}.rpm"
 
-      - name: Upload Artifact
+  publish_linux_rpm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      - name: Install Node and NPM
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{env.NODE_VERSION}}
+          cache: npm
+
+      - name: Install and build
+        run: |
+          npm install
+          npm run postinstall
+          npm run build
+
+      - name: Package Linux
         continue-on-error: true
+        run: |
+          npm exec electron-builder -- --publish=never --linux --target=rpm
+
+      - name: Renames rpm
+        run: |
+          mv ./release/build/*.rpm "./$APP_PACKAGE_NAME.rpm"
+
+      - name: Upload rpm
         uses: actions/upload-artifact@v3
         with:
-          name: Har-Visual-Native-0.0.1.dmg
-          path: ./release/build/Har-Visual-Native-0.0.1.dmg
-
-      - name: Upload Artifact
-        continue-on-error: true
-        uses: actions/upload-artifact@v3
-        with:
-          name: Har-Visual-Native Setup 0.0.1.exe
-          path: ./release/build/Har-Visual-Native Setup 0.0.1.exe
-
-      - name: Upload Artifact
-        continue-on-error: true
-        uses: actions/upload-artifact@v3
-        with:
-          name: Har-Visual-Native-0.0.1.AppImage
-          path: ./release/build/Har-Visual-Native-0.0.1.AppImage
-
-      - name: Upload Artifact
-        continue-on-error: true
-        uses: actions/upload-artifact@v3
-        with:
-          name: Har-Visual-Native-0.0.1.deb
-          path: ./release/build/har-visual-native_0.0.1_amd64.deb
-
-      - name: Upload Artifact
-        continue-on-error: true
-        uses: actions/upload-artifact@v3
-        with:
-          name: Har-Visual-Native-0.0.1.pacman
-          path: ./release/build/Har-Visual-Native-0.0.1.pacman
-
-      - name: Upload Artifact
-        continue-on-error: true
-        uses: actions/upload-artifact@v3
-        with:
-          name: Har-Visual-Native-0.0.1.snap
-          path: ./release/build/Har-Visual-Native-0.0.1.snap
-
-      - name: Upload Artifact
-        continue-on-error: true
-        uses: actions/upload-artifact@v3
-        with:
-          name: Har-Visual-Native-0.0.1.rpm
-          path: ./release/build/Har-Visual-Native-0.0.1.rpm
+          name: "${{env.APP_PACKAGE_NAME}}-rpm"
+          path: "./${{env.APP_PACKAGE_NAME}}.rpm"
