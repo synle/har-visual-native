@@ -50,7 +50,6 @@ import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
 import CircularProgress from '@mui/material/CircularProgress';
 
-
 function Header() {
   const navigate = useNavigate();
   return (
